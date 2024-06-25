@@ -1,0 +1,82 @@
+﻿@page "/testing"
+
+<h3>Testing</h3>
+
+<div class="container">
+    <div class="col-md-12">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Last Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var person in people)
+                {
+                    <tr>
+                        <td>@person.LastName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="container">
+    <form @onsubmit="HandleSubmit">
+        <div class="mb-3">
+            <label for="list" class="form-label">List</label>
+            <InputSelect @bind-Value="selectedLastName" class="form-control">
+                <option value="">Select any</option>
+                @foreach (var person in people)
+                {
+                    <option value="@person.LastName">@person.LastName</option>
+                }
+            </InputSelect>
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+</div>
+
+@code {
+    public class Person
+    {
+        public string LastName { get; set; }
+    }
+
+    private List<Person> people;
+    private string selectedLastName;
+
+    protected override void OnInitialized()
+    {
+        string jsonData = @"
+        [
+            { ""LastName"": ""Otto"" },
+            { ""LastName"": ""Thornton"" },
+            { ""LastName"": ""Bird"" }
+        ]";
+
+        people = System.Text.Json.JsonSerializer.Deserialize<List<Person>>(jsonData);
+    }
+
+    private void HandleSubmit()
+    {
+        if (!string.IsNullOrWhiteSpace(selectedLastName))
+        {
+            // Check if the selected last name is already in the list
+            var existingPerson = people.FirstOrDefault(p => p.LastName == selectedLastName);
+            //if (existingPerson == null)
+            //{
+                // Add the selected person to the list if not already present
+                people.Add(new Person { LastName = selectedLastName });
+            //}
+        }
+
+        // Reset the form for new input
+        selectedLastName = null;
+
+        // Serialize updated list to JSON format (for debugging purposes)
+        string jsonData = System.Text.Json.JsonSerializer.Serialize(people);
+        Console.WriteLine(jsonData); // Use or save the JSON data as needed
+    }
+}
